@@ -1,0 +1,10 @@
+$profilePath = Split-Path $profile -Parent
+$ENV:STARSHIP_CONFIG = "$profilePath\starship.toml"
+Invoke-Expression (&starship init powershell)
+
+
+install font:
+caskyadia cove ner mono for vs code
+and Meslo for vs
+
+and starship for prompt
