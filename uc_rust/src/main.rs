@@ -189,6 +189,9 @@ fn print_help_and_exit() {
     println!("\t'uc list commands' shows a list of all available commands");
     //println!("\t'uc help' shows help page");
     println!("");
+    println!("While not required, you may opt to use promt extenders for your shell and use ucs tool along uc.");
+    println!("XXX See README.md for more information.");
+    println!("");
     println!("To download and update new version of uc, clone this Git: https://github.com/Luunoronti/uc");
     println!("You will need to install Rust to build uc.");
     println!("Once cloned, build uc. To do so, change target to uc_rust and invoke 'Cargo build -r'.");
