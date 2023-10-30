@@ -34,16 +34,16 @@ fn process_msg(data: &[u8]) {
     }
     let msg = std::str::from_utf8(&data[3..(data.len())]).unwrap();
 
-    let con_color = match msg_type{
-        0 => 31, // error
-        1 => 31, // assert
-        2 => 33, // warning
-        3 => 0, // log
-        4 => 35, // exception
-        12 => 32, // new session
-        _ => 0,
-    };
-    println!("\x1b[{}m{}\x1b[0m", con_color, msg);
+    // let con_color = match msg_type{
+    //     0 => 31, // error
+    //     1 => 31, // assert
+    //     2 => 33, // warning
+    //     3 => 0, // log
+    //     4 => 35, // exception
+    //     12 => 32, // new session
+    //     _ => 0,
+    // };
+    println!("{}", msg);
 }
 
 
