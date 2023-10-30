@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Set platform Steam": {
-      "commandName": "Project",
-      "commandLineArgs": "testProgress"
-    }
-  }
-}
