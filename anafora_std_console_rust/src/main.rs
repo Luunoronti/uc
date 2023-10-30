@@ -1,11 +1,6 @@
 use std::env;
-//use std::fs;
 use std::net::UdpSocket;
-//use std::path::Path;
 use std::process::exit;
-//extern crate term_cursor as cursor;
-//use terminal_size::{terminal_size, Height, Width};
-
 
 fn main() {
     if env::args().count() > 1 {
@@ -70,35 +65,3 @@ fn print_help_and_exit() {
     println!();
     exit(0);
 }
-// fn construct_command() -> String {
-//     let args: Vec<String> = env::args()
-//         .skip(1)
-//         .map(|arg: String| {
-//             if arg.contains(' ') {
-//                 format!("\"{}\"", arg)
-//             } else {
-//                 arg
-//             }
-//         })
-//         .collect();
-//     return args.join(" ");
-// }
-// fn send_command(command: &String, socket: &UdpSocket) {
-//     let cmd_bytes: &[u8] = command.as_bytes();
-//     let cmd_len: usize = cmd_bytes.len();
-//     let mut buffer: Vec<u8> = vec![0; cmd_len + 3];
-//     buffer[3..cmd_len + 3].copy_from_slice(cmd_bytes);
-//     buffer[0] = 0x02;
-//     buffer[1] = (cmd_len >> 8) as u8;
-//     buffer[2] = (cmd_len & 0xff) as u8;
-
-//     let ipendpoint: String =
-//         fs::read_to_string("editorconsole.cfg").expect("editor console cfg error");
-//     match socket.send_to(&buffer, ipendpoint) {
-//         Ok(_sent) => {}
-//         Err(_e) => {
-//             println!("[Error: {}]", _e);
-//             exit(-1);
-//         }
-//     };
-// }
