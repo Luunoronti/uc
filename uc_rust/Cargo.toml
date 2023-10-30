@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 build-data = "0.1.5"
+proctitle = "0.1.1"
 term_cursor = "0.2.1"
 terminal_size = "0.3.0"
 

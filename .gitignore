@@ -14,3 +14,5 @@ uc/obj
 ucs/target/
 uc_rust/target/
 anafora_std_console_rust/target/
+uct/obj/Release/
+uct/bin/Release/

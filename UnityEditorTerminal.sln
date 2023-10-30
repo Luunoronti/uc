@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uc_net", "uc_net\uc_net.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ucbw", "ucbw\ucbw.csproj", "{546127C3-2061-441C-8798-88A127B785E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uct", "uct\uct.csproj", "{8C2039A8-9F66-4DCF-8D43-5CC4088632FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{546127C3-2061-441C-8798-88A127B785E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{546127C3-2061-441C-8798-88A127B785E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{546127C3-2061-441C-8798-88A127B785E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C2039A8-9F66-4DCF-8D43-5CC4088632FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C2039A8-9F66-4DCF-8D43-5CC4088632FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C2039A8-9F66-4DCF-8D43-5CC4088632FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C2039A8-9F66-4DCF-8D43-5CC4088632FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

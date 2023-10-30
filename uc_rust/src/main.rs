@@ -5,6 +5,8 @@ use std::path::Path;
 use std::process::exit;
 extern crate term_cursor as cursor;
 use terminal_size::{terminal_size, Height, Width};
+use proctitle::set_title;
+
 
 static mut PROGRESS_BEGAN: bool = false;
 static mut LAST_TITLE_LEN: usize = 0;
@@ -16,6 +18,22 @@ fn main() {
     if env::args().count() == 1 {
         print_help_and_exit();
     }
+
+    if env::args().count() == 3 {
+        let args: Vec<String> = env::args()
+        .skip(1)
+        .collect();
+
+        if args[0] == "--setConsoleTitle"
+        {
+           // let term = Term::stdout();
+           // term.set_title(args[1].to_string());
+            set_title(format!("example: {}", args[1]));
+            println!("Setting console title to {}", args[1]);
+            return;
+        }
+    }
+
 
     if Path::new("editorconsole.cfg").is_file() == false {
         return;
