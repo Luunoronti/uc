@@ -179,7 +179,7 @@ unsafe fn show_progress(data: &[u8]) {
 }
 
 fn print_help_and_exit() {
-    println!("Unity Command tool v. 0.2 {} {}, built Rust {}", 
+    println!("Unity Command tool v. 0.2 {} {}, built with {}", 
         env!("BUILD_DATE"),
         env!("BUILD_TIME"),
         env!("RUSTC_VERSION"), 
