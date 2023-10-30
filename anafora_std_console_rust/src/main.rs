@@ -10,7 +10,7 @@ fn main() {
     let socket: UdpSocket = UdpSocket::bind("0.0.0.0:39912").expect("couldn't bind to address");
     let mut buffer = [0; 1024 * 64];
 
-    print!("\x1b[?25l");
+    //print!("\x1b[?25l");
     loop {
         let size = match socket.recv_from(&mut buffer) {
             Ok(s) => s.0,
