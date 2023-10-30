@@ -179,7 +179,11 @@ unsafe fn show_progress(data: &[u8]) {
 }
 
 fn print_help_and_exit() {
-    println!("Unity Command tool v. 0.2");
+    println!("Unity Command tool v. 0.2 {} {}, built Rust {}", 
+        env!("BUILD_DATE"),
+        env!("BUILD_TIME"),
+        env!("RUSTC_VERSION"), 
+    );
     println!("Usage:");
     println!("\t'uc <command> <parameters> <flags>' sends command to default host editor");
     println!("\t'uc list commands' shows a list of all available commands");

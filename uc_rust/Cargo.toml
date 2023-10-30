@@ -6,5 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+build-data = "0.1.5"
 term_cursor = "0.2.1"
 terminal_size = "0.3.0"
+
+[build-dependencies]
+build-data = "0"
