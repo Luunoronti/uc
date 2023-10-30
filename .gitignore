@@ -13,3 +13,4 @@ uc/obj
 *.csproj.user
 ucs/target/
 uc_rust/target/
+anafora_std_console_rust/target/

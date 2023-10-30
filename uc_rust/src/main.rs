@@ -145,7 +145,7 @@ unsafe fn show_progress(data: &[u8]) {
         cpu_flag = "\x1b[32m";
     } else if _cpu < 80 {
         cpu_flag = "\x1b[33m";
-    } else if _cpu < 40 {
+    } else {
         cpu_flag = "\x1b[31m";
     }
     let mut mem_flag = "";
@@ -184,6 +184,7 @@ fn print_help_and_exit() {
         env!("BUILD_TIME"),
         env!("RUSTC_VERSION"), 
     );
+
     println!("Usage:");
     println!("\t'uc <command> <parameters> <flags>' sends command to default host editor");
     println!("\t'uc list commands' shows a list of all available commands");

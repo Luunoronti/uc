@@ -1,0 +1,12 @@
+[package]
+name = "asc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+build-data = "0.1.5"
+term_cursor = "0.2.1"
+terminal_size = "0.3.0"
+
+[build-dependencies]
+build-data = "0"
