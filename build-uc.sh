@@ -6,7 +6,7 @@ git pull
 # call ccargo
 cargo build -r --manifest-path ./uc/Cargo.toml
 
-chmod +x uc_rust/target/release/uc 
+chmod +x uc/target/release/uc 
 # test if we can put a copy to /usr/bin/ here
-sudo cp uc_rust/target/release/uc /usr/bin/
+sudo cp uc/target/release/uc /usr/bin/
 
