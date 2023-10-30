@@ -187,8 +187,12 @@ fn print_help_and_exit() {
     println!("Usage:");
     println!("\t'uc <command> <parameters> <flags>' sends command to default host editor");
     println!("\t'uc list commands' shows a list of all available commands");
-    println!("\t'uc help' shows help page");
-    println!("\t'uc selfupdate' to download and update uc");
+    //println!("\t'uc help' shows help page");
+    println!("");
+    println!("To download and update new version of uc, clone this Git: https://github.com/Luunoronti/uc");
+    println!("You will need to install Rust to build uc.");
+    println!("Once cloned, build uc. To do so, change target to uc_rust and invoke 'Cargo build -r'.");
+    
     println!();
     exit(0);
 }
