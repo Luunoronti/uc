@@ -133,7 +133,7 @@ unsafe fn show_progress(data: &[u8]) {
     //     format!("{:─<20}", format!("\x1b[32m{:▬<prog_val$}\x1b[33m", ""))
     // );
     let progress_bar = format!(
-        "\x1b[33m[\x1b[32m{}\x1b[33m]\x1b[32m\x1b[0m",
+        " \x1b[32m{} \x1b[32m\x1b[0m",
         format!("{:░<20}", format!("{:█<prog_val$}", ""))
     );
     
