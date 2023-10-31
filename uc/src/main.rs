@@ -111,7 +111,7 @@ unsafe fn show_progress(data: &[u8]) {
         }
 
         let (_, ny) = cursor::get_pos().expect("Getting the cursor position failed");
-        cursor::set_pos(0, ny - 1).expect("Set failed again");
+        cursor::set_pos(0, ny - 2).expect("Set failed again");
         PROGRESS_BEGAN = true;
     }
 
