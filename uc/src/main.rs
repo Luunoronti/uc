@@ -19,21 +19,6 @@ fn main() {
         print_help_and_exit();
     }
 
-    if env::args().count() == 3 {
-        let args: Vec<String> = env::args()
-        .skip(1)
-        .collect();
-
-        if args[0] == "--setConsoleTitle"
-        {
-           // let term = Term::stdout();
-           // term.set_title(args[1].to_string());
-            set_title(format!("example: {}", args[1]));
-            println!("Setting console title to {}", args[1]);
-            return;
-        }
-    }
-
 
     if Path::new("editorconsole.cfg").is_file() == false {
         return;
