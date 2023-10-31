@@ -5,7 +5,6 @@ use std::path::Path;
 use std::process::exit;
 extern crate term_cursor as cursor;
 use terminal_size::{terminal_size, Height, Width};
-use proctitle::set_title;
 
 
 static mut PROGRESS_BEGAN: bool = false;
