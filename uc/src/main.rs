@@ -114,14 +114,16 @@ unsafe fn show_progress(data: &[u8]) {
         if x > 0 {
             println!();
             println!();
-            //println!();
-            let (_, y) = cursor::get_pos().expect("Getting the cursor position failed");
-            CUR_Y = y - 2;
-        } else {
             println!();
             //println!();
             let (_, y) = cursor::get_pos().expect("Getting the cursor position failed");
-            CUR_Y = y - 1;
+            CUR_Y = y - 3;
+        } else {
+            println!();
+            println!();
+            //println!();
+            let (_, y) = cursor::get_pos().expect("Getting the cursor position failed");
+            CUR_Y = y - 2;
         }
 
         let (_, ny) = cursor::get_pos().expect("Getting the cursor position failed");
