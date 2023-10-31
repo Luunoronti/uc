@@ -95,6 +95,10 @@ unsafe fn show_progress(data: &[u8]) {
         // hide cursor and store its position, add 4 lines, restore cursor position
         let (x, _) = cursor::get_pos().expect("Getting the cursor position failed");
         CUR_X = x;
+        if x > 0
+        {
+            CUR_X = x + 1;
+        }
         if x > 0 {
             println!();
             println!();
