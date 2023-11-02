@@ -13,16 +13,19 @@ namespace ucbw
 {
     internal class Program
     {
-        private static PerformanceCounter cpuCounter;
+        private static List<PerformanceCounter> cpuCounter;
         private static PerformanceCounter ramCounter;
         private static bool perfCountersMade;
+
+
 
         private const int MSG_SIZE = 1  // msg type (0x10: progress message)
                         + 1 // progress value (0-100)
                         + 1 // CPU percent (0-100)
                         + 1 // RAM percent (0-100)
                         + 1 // currTitle size (0-255)
-                        + 1 // currMsg size (0-255)/ if msg or title is larger, substring it
+                        + 1 // currMsg size (0-255)/ if msg or title is larger, substring it,
+                        + 1 // number if CPU cores
             ;
 
         static void Main(string[] args)
@@ -48,8 +51,21 @@ namespace ucbw
 
             new Thread(() =>
             {
-                cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+                cpuCounter = new List<PerformanceCounter>();
+                //cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
                 ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+
+                var pc = new PerformanceCounter("Processor", "% Processor Time");
+                var cat = new PerformanceCounterCategory("Processor");
+                var instances = cat.GetInstanceNames();
+
+                foreach (var s in instances)
+                {
+                    cpuCounter.Add(new PerformanceCounter("Processor", "% Processor Time", s));
+                }
+
+                cpuCounter.Sort((a, b) => a.InstanceName.CompareTo(b.InstanceName));
+
                 perfCountersMade = true;
             }).Start();
 
@@ -77,6 +93,12 @@ namespace ucbw
                     var currTitle = GetWindowTextInt(hwnd);
                     var currMsg = GetWindowTextInt(labelHwnd);
                     var percent = GetPercentage(progressHwnd);
+
+                    currTitle = currTitle.Replace("\n", "");
+                    currTitle = currTitle.Replace("\r", "");
+
+                    currMsg = currMsg.Replace("\n", "");
+                    currMsg = currMsg.Replace("\r", "");
 
                     if (currTitle == null || currMsg == null) break;
 
@@ -106,12 +128,14 @@ namespace ucbw
                         titleBytes = Encoding.UTF8.GetByteCount(currTitle);
                     }
 
-                    byte[] data = new byte[MSG_SIZE + titleBytes + msgbytes];
+                    int cpuCoresCount = Environment.ProcessorCount;
+
+                    byte[] data = new byte[MSG_SIZE + titleBytes + msgbytes + cpuCoresCount];
                     data[0] = 0x10;
                     data[1] = (byte)percent;
                     if (perfCountersMade)
                     {
-                        data[2] = (byte)(int)cpuCounter.NextValue();
+                        data[2] = (byte)(int)cpuCounter.First(c => c.InstanceName == "_Total").NextValue();
                         data[3] = (byte)(int)((totalMemMB - ramCounter.NextValue()) / totalMemMB * 100);
                     }
 
@@ -120,9 +144,15 @@ namespace ucbw
 
                     Encoding.UTF8.GetBytes(currTitle, 0, currTitle.Length, data, 6);
                     Encoding.UTF8.GetBytes(currMsg, 0, currMsg.Length, data, 6 + titleBytes);
-                    
-                    udp.Send(data, data.Length, new IPEndPoint(IPAddress.Parse(host), port));
 
+                    // add cores count and cores to data
+                    data[6 + titleBytes + msgbytes] = (byte)cpuCoresCount;
+                    for (int core = 0; core < cpuCoresCount; core++)
+                    {
+                        if (perfCountersMade)
+                            data[6 + titleBytes + msgbytes + 1 + core] = (byte)(int)cpuCounter[core].NextValue();
+                    }
+                    udp.Send(data, data.Length, new IPEndPoint(IPAddress.Parse(host), port));
                     Thread.Sleep(1);
                 }
             }

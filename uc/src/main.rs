@@ -6,10 +6,10 @@ use std::process::exit;
 extern crate term_cursor as cursor;
 use terminal_size::{terminal_size, Height, Width};
 
-
 static mut PROGRESS_BEGAN: bool = false;
 static mut LAST_TITLE_LEN: usize = 0;
 static mut LAST_MSG_LEN: usize = 0;
+static mut STATUS_LEN: usize = 0;
 static mut CUR_X: i32 = 0;
 static mut CUR_Y: i32 = 0;
 
@@ -17,7 +17,6 @@ fn main() {
     if env::args().count() == 1 {
         print_help_and_exit();
     }
-
 
     if Path::new("editorconsole.cfg").is_file() == false {
         return;
@@ -70,7 +69,12 @@ unsafe fn hide_progress() {
     let ttl = LAST_TITLE_LEN + 29;
     let msl = LAST_MSG_LEN + 25;
 
-    print!("{}\n{}", format!("{:<ttl$}", ""), format!("{:<msl$}", ""));
+    print!(
+        "{}\n{}\n{}",
+        format!("{:<ttl$}", ""),
+        format!("{:<msl$}", ""),
+        format!("{:<STATUS_LEN$}", "")
+    );
     cursor::set_pos(CUR_X, CUR_Y).expect("Set failed again");
 }
 unsafe fn show_progress(data: &[u8]) {
@@ -78,9 +82,10 @@ unsafe fn show_progress(data: &[u8]) {
     let _cpu = data[2];
     let _mem = data[3];
     let title_size: usize = data[4] as usize;
+    let msg_size: usize = data[5] as usize;
 
     let title = std::str::from_utf8(&data[6..(6 + title_size)]).unwrap();
-    let msg = std::str::from_utf8(&data[6 + title_size..data.len()]).unwrap();
+    let msg = std::str::from_utf8(&data[6 + title_size..6 + title_size + msg_size]).unwrap();
 
     let mut wnd_width: usize = 40;
 
@@ -89,33 +94,33 @@ unsafe fn show_progress(data: &[u8]) {
     } else {
     }
 
-    
     // store cursor position
     if PROGRESS_BEGAN == false {
         // hide cursor and store its position, add 4 lines, restore cursor position
         let (x, _) = cursor::get_pos().expect("Getting the cursor position failed");
         CUR_X = x;
-        if x > 0
-        {
+        if x > 0 {
             CUR_X = x + 1;
         }
         if x > 0 {
             println!();
             println!();
             println!();
+            println!();
             //println!();
             let (_, y) = cursor::get_pos().expect("Getting the cursor position failed");
-            CUR_Y = y - 3;
+            CUR_Y = y - 4;
         } else {
             println!();
             println!();
+            println!();
             //println!();
             let (_, y) = cursor::get_pos().expect("Getting the cursor position failed");
-            CUR_Y = y - 2;
+            CUR_Y = y - 3;
         }
 
         let (_, ny) = cursor::get_pos().expect("Getting the cursor position failed");
-        cursor::set_pos(0, ny - 2).expect("Set failed again");
+        cursor::set_pos(0, ny - 3).expect("Set failed again");
         PROGRESS_BEGAN = true;
     }
 
@@ -136,7 +141,6 @@ unsafe fn show_progress(data: &[u8]) {
         " \x1b[32m{} \x1b[32m\x1b[0m",
         format!("{:▒<20}", format!("{:█<prog_val$}", ""))
     );
-    
 
     print!("{}", progress_bar);
 
@@ -148,11 +152,70 @@ unsafe fn show_progress(data: &[u8]) {
     if LAST_TITLE_LEN <= title.len() {
         print!(" {:.ttl_width_msg$}\n", title);
     } else {
-        print!(" {:.ttl_width_msg$}\n", format!("{:<LAST_TITLE_LEN$}", title));
+        print!(
+            " {:.ttl_width_msg$}\n",
+            format!("{:<LAST_TITLE_LEN$}", title)
+        );
     }
     print!("\x1b[0m");
 
+    // next line is message only
+    // and next line will be CPU and RAM status of the machine
+
     // print CPU and RAM
+    // let mut cpu_flag = "";
+    // if _cpu < 40 {
+    //     cpu_flag = "\x1b[32m";
+    // } else if _cpu < 80 {
+    //     cpu_flag = "\x1b[33m";
+    // } else {
+    //     cpu_flag = "\x1b[31m";
+    // }
+    // let mut mem_flag = "";
+    // if _mem < 40 {
+    //     mem_flag = "\x1b[32m";
+    // } else if _mem < 80 {
+    //     mem_flag = "\x1b[33m";
+    // } else if _mem < 40 {
+    //     mem_flag = "\x1b[31m";
+    // }
+    // print!(
+    //     "  CPU:{}{:3}%\x1b[0m  RAM:{}{:3}%\x1b[0m  ",
+    //     cpu_flag, _cpu, mem_flag, _mem
+    // );
+
+    // print!("  ");
+
+    let wnd_width_msg = wnd_width - 3;
+
+    // print message
+    if LAST_MSG_LEN <= msg.len() {
+        print!(" {:.wnd_width_msg$}", msg);
+    } else {
+        print!(" {:.wnd_width_msg$}", format!("{:<LAST_MSG_LEN$}", msg));
+    }
+
+    LAST_MSG_LEN = msg.len(); // size is 25 + msg
+    LAST_TITLE_LEN = title.len(); // std size of title len is 29 + title
+
+    // construct string of CPU cores
+    let mut offset = 6 + title_size + msg_size;
+    let cores_count = (data[offset]) as usize;
+    offset += 1;
+    let mut cores_string = String::new();
+
+    for _i in 0..cores_count
+    {
+        let s1 = cores_string;
+        let s2 = get_cpu_core_mark(data[offset]);
+        let s3 = s1 + &s2;
+        cores_string = s3;
+        offset += 1;
+    }
+
+    let cpucores = format!(" {} ", cores_string);
+
+    // print CPU and RAM status
     let mut cpu_flag = "";
     if _cpu < 40 {
         cpu_flag = "\x1b[32m";
@@ -169,33 +232,29 @@ unsafe fn show_progress(data: &[u8]) {
     } else if _mem < 40 {
         mem_flag = "\x1b[31m";
     }
-    print!(
-        "  CPU:{}{:3}%\x1b[0m  RAM:{}{:3}%\x1b[0m  ",
-        cpu_flag, _cpu, mem_flag, _mem
+    
+    let full_str = format!(
+        "\n CPU:{}{:3}% {} \x1b[0m RAM:{}{:3}%\x1b[0m  ",
+        cpu_flag, _cpu, cpucores, mem_flag, _mem
     );
-
-    print!("  ");
-
-    let wnd_width_msg = wnd_width - 26;
-
-    // print message
-    if LAST_MSG_LEN <= msg.len() {
-        print!("{:.wnd_width_msg$}", msg);
-    } else {
-        print!("{:.wnd_width_msg$}\n", format!("{:<LAST_MSG_LEN$}", msg));
-    }
-
-    LAST_MSG_LEN = msg.len(); // size is 25 + msg
-    LAST_TITLE_LEN = title.len(); // std size of title len is 29 + title
-
+    print!("{}", full_str);
+    STATUS_LEN = full_str.len(); 
     cursor::set_pos(cx, cy).expect("Set failed again");
 }
 
+fn get_cpu_core_mark(value: u8) -> String
+{
+    let green = (255.0 - (255.0 * ((value as f32) / 100.0))) as i32;
+    let red = (255.0 * ((value as f32) / 100.0)) as i32;
+    return String::from(format!("\x1b[38;2;{};{};0m■\x1b[0m", red, green));
+}
+
 fn print_help_and_exit() {
-    println!("Unity Command tool v. 0.2 {} {}, built with {}", 
+    println!(
+        "Unity Command tool v. 0.2 {} {}, built with {}",
         env!("BUILD_DATE"),
         env!("BUILD_TIME"),
-        env!("RUSTC_VERSION"), 
+        env!("RUSTC_VERSION"),
     );
 
     println!("Usage:");
@@ -208,8 +267,10 @@ fn print_help_and_exit() {
     println!("");
     println!("To download and update new version of uc, clone this Git: https://github.com/Luunoronti/uc");
     println!("You will need to install Rust to build uc.");
-    println!("Once cloned, build uc. To do so, change target to uc_rust and invoke 'Cargo build -r'.");
-    
+    println!(
+        "Once cloned, build uc. To do so, change target to uc_rust and invoke 'Cargo build -r'."
+    );
+
     println!();
     exit(0);
 }
