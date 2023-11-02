@@ -140,11 +140,15 @@ unsafe fn show_progress(data: &[u8]) {
         format!("{:█<prog_val$}", "")
     );
     let prog_val_e = 20 - prog_val;
+    // let progress_bar_empty = format!(
+    //     "\x1b[38;2;80;80;80m{}\x1b[32m\x1b[0m",
+    //     format!("{:▒<prog_val_e$}", "")
+    // );
+
     let progress_bar_empty = format!(
         "\x1b[38;2;80;80;80m{}\x1b[32m\x1b[0m",
-        format!("{:▒<prog_val_e$}", "")
+        format!("{:█<prog_val_e$}", "")
     );
-
     let progress_bar = format!(" {}{} ", progress_bar_compl, progress_bar_empty);
 
     print!("{}", progress_bar);
