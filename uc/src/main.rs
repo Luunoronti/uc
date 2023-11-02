@@ -133,22 +133,26 @@ unsafe fn show_progress(data: &[u8]) {
         prog_val += 1;
     }
 
-    // let progress_bar = format!(
-    //     "\x1b[33m[\x1b[32m{}\x1b[33m]\x1b[32m\x1b[0m",
-    //     format!("{:─<20}", format!("\x1b[32m{:▬<prog_val$}\x1b[33m", ""))
-    // );
-    let progress_bar = format!(
-        " \x1b[32m{} \x1b[32m\x1b[0m",
-        format!("{:▒<20}", format!("{:█<prog_val$}", ""))
+    let progress_bar_compl = format!(
+        "\x1b[38;2;0;180;0m{}\x1b[32m\x1b[0m",
+        format!("{:█<prog_val$}", "")
     );
+    let prog_val_e = 20 - prog_val;
+    let progress_bar_empty = format!(
+        "\x1b[38;2;80;80;80m{}\x1b[32m\x1b[0m",
+        format!("{:▒<prog_val_e$}", "")
+    );
+
+
+    let progress_bar = format!(" {}{} ", progress_bar_compl, progress_bar_empty);
 
     print!("{}", progress_bar);
 
-    print!(" \x1b[32m{:3}%\x1b[0m", _prog);
+    print!(" \x1b[0m{:3}%\x1b[0m", _prog);
 
     let ttl_width_msg = wnd_width - 29;
     // print title, advance to new line
-    print!("\x1b[1m\x1b[93m");
+    print!("\x1b[1m\x1b[38;2;180;180;0m");
     if LAST_TITLE_LEN <= title.len() {
         print!(" {:.ttl_width_msg$}\n", title);
     } else {
@@ -157,42 +161,15 @@ unsafe fn show_progress(data: &[u8]) {
             format!("{:<LAST_TITLE_LEN$}", title)
         );
     }
-    print!("\x1b[0m");
-
-    // next line is message only
-    // and next line will be CPU and RAM status of the machine
-
-    // print CPU and RAM
-    // let mut cpu_flag = "";
-    // if _cpu < 40 {
-    //     cpu_flag = "\x1b[32m";
-    // } else if _cpu < 80 {
-    //     cpu_flag = "\x1b[33m";
-    // } else {
-    //     cpu_flag = "\x1b[31m";
-    // }
-    // let mut mem_flag = "";
-    // if _mem < 40 {
-    //     mem_flag = "\x1b[32m";
-    // } else if _mem < 80 {
-    //     mem_flag = "\x1b[33m";
-    // } else if _mem < 40 {
-    //     mem_flag = "\x1b[31m";
-    // }
-    // print!(
-    //     "  CPU:{}{:3}%\x1b[0m  RAM:{}{:3}%\x1b[0m  ",
-    //     cpu_flag, _cpu, mem_flag, _mem
-    // );
-
-    // print!("  ");
+    print!("\x1b[0m\x1b[38;2;120;120;120m");
 
     let wnd_width_msg = wnd_width - 3;
 
     // print message
     if LAST_MSG_LEN <= msg.len() {
-        print!(" {:.wnd_width_msg$}", msg);
+        print!(" {:.wnd_width_msg$}\x1b[0m", msg);
     } else {
-        print!(" {:.wnd_width_msg$}", format!("{:<LAST_MSG_LEN$}", msg));
+        print!(" {:.wnd_width_msg$}\x1b[0m", format!("{:<LAST_MSG_LEN$}", msg));
     }
 
     LAST_MSG_LEN = msg.len(); // size is 25 + msg
@@ -204,8 +181,7 @@ unsafe fn show_progress(data: &[u8]) {
     offset += 1;
     let mut cores_string = String::new();
 
-    for _i in 0..cores_count
-    {
+    for _i in 0..cores_count {
         let s1 = cores_string;
         let s2 = get_cpu_core_mark(data[offset]);
         let s3 = s1 + &s2;
@@ -216,37 +192,39 @@ unsafe fn show_progress(data: &[u8]) {
     let cpucores = format!("{}", cores_string);
 
     // print CPU and RAM status
-    let mut cpu_flag = "";
-    if _cpu < 40 {
-        cpu_flag = "\x1b[32m";
-    } else if _cpu < 80 {
-        cpu_flag = "\x1b[33m";
-    } else {
-        cpu_flag = "\x1b[31m";
-    }
-    let mut mem_flag = "";
-    if _mem < 40 {
-        mem_flag = "\x1b[32m";
-    } else if _mem < 80 {
-        mem_flag = "\x1b[33m";
-    } else if _mem < 40 {
-        mem_flag = "\x1b[31m";
-    }
-    
-    let full_str = format!(
-        "\n CPU:{}{:3}% {} \x1b[0m RAM:{}{:3}%\x1b[0m  ",
-        cpu_flag, _cpu, cpucores, mem_flag, _mem
+    let cpu = format!(
+        "\x1b[38;2;{};{};0m{:3}%\x1b[0m",
+        get_red(_cpu),
+        get_green(_cpu),
+        _cpu
     );
+    let mem = format!(
+        "\x1b[38;2;{};{};0m{:3}%\x1b[0m",
+        get_red(_mem),
+        get_green(_mem),
+        _mem
+    );
+
+    let full_str = format!("\n CPU:{} {} \x1b[0m RAM:{}  ", cpu, cpucores, mem);
     print!("{}", full_str);
-    STATUS_LEN = full_str.len(); 
+    STATUS_LEN = full_str.len();
     cursor::set_pos(cx, cy).expect("Set failed again");
 }
 
-fn get_cpu_core_mark(value: u8) -> String
-{
-    let green = (255.0 - (255.0 * ((value as f32) / 100.0))) as i32;
-    let red = (255.0 * ((value as f32) / 100.0)) as i32;
-    return String::from(format!("\x1b[38;2;{};{};0m■\x1b[0m", red, green));
+fn get_red(value: u8) -> i32 {
+    (255.0 * ((value as f32) / 100.0)) as i32
+}
+
+fn get_green(value: u8) -> i32 {
+    (255.0 - (255.0 * ((value as f32) / 100.0))) as i32
+}
+
+fn get_cpu_core_mark(value: u8) -> String {
+    return String::from(format!(
+        "\x1b[38;2;{};{};0m■\x1b[0m",
+        get_red(value),
+        get_green(value)
+    ));
 }
 
 fn print_help_and_exit() {
