@@ -91,11 +91,34 @@ namespace ucbw
 
                 Dictionary<string, List<int>> countAvg = null;
 
+                int GetMedian(List<int> source)
+                {
+                    // Check if the array has values        
+                    if (source == null || source.Count == 0)
+                        throw new ArgumentException("Array is empty.");
+
+                    // Sort the array
+                    source.Sort();
+
+                    // Calculate the median
+                    int size = source.Count;
+                    int mid = size / 2;
+
+                    if (size % 2 != 0)
+                        return source[mid];
+                    dynamic value1 = source[mid];
+                    dynamic value2 = source[mid - 1];
+                    return (value1 + value2) / 2;
+                }
+
                 byte GetAvg(string name, float value)
                 {
+                    return (byte)(int)value;
                     var l = countAvg[name];
                     l.Add((int)value);
-                    if (l.Count > 20) l.RemoveAt(0);
+                    if (l.Count > 4) l.RemoveAt(0);
+                    //return (byte)GetMedian(l);
+                    var avg = l.Average();
                     return (byte)(int)l.Average();
                 }
                 while (true)

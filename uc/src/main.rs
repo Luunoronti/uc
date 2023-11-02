@@ -213,7 +213,7 @@ unsafe fn show_progress(data: &[u8]) {
         offset += 1;
     }
 
-    let cpucores = format!(" {} ", cores_string);
+    let cpucores = format!("{}", cores_string);
 
     // print CPU and RAM status
     let mut cpu_flag = "";
