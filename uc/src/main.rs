@@ -167,7 +167,7 @@ unsafe fn show_progress(data: &[u8]) {
             format!("{:<LAST_TITLE_LEN$}", title)
         );
     }
-    print!("\x1b[0m\x1b[38;2;120;120;120m");
+    print!("\x1b[0m\x1b[38;2;160;160;160m");
 
     let wnd_width_msg = wnd_width - 3;
 
