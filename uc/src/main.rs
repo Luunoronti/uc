@@ -246,7 +246,7 @@ fn get_cpu_core_mark(value: u8) -> String
 {
     let green = (255.0 - (255.0 * ((value as f32) / 100.0))) as i32;
     let red = (255.0 * ((value as f32) / 100.0)) as i32;
-    return String::from(format!("\x1b[38;2;{};{};0m■\x1b[0m", red, green));
+    return String::from(format!("\x1b[38;2;{};{};0m■{}\x1b[0m", red, green, value));
 }
 
 fn print_help_and_exit() {
