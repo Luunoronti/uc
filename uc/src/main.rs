@@ -13,6 +13,9 @@ static mut STATUS_LEN: usize = 0;
 static mut CUR_X: i32 = 0;
 static mut CUR_Y: i32 = 0;
 
+pub mod tools;
+pub mod cpuprogress;
+
 fn main() {
     if env::args().count() == 1 {
         print_help_and_exit();
@@ -79,8 +82,6 @@ unsafe fn hide_progress() {
 }
 unsafe fn show_progress(data: &[u8]) {
     let _prog = data[1];
-    let _cpu = data[2];
-    let _mem = data[3];
     let title_size: usize = data[4] as usize;
     let msg_size: usize = data[5] as usize;
 
@@ -128,6 +129,7 @@ unsafe fn show_progress(data: &[u8]) {
     let (cx, cy) = cursor::get_pos().expect("Getting the cursor position failed");
 
     // todo: print progress
+    
     let mut prog_val = (_prog / 5) as usize;
     if prog_val > 0 && prog_val < 20 {
         prog_val += 1;
@@ -143,12 +145,12 @@ unsafe fn show_progress(data: &[u8]) {
         format!("{:▒<prog_val_e$}", "")
     );
 
-
     let progress_bar = format!(" {}{} ", progress_bar_compl, progress_bar_empty);
 
     print!("{}", progress_bar);
 
     print!(" \x1b[0m{:3}%\x1b[0m", _prog);
+
 
     let ttl_width_msg = wnd_width - 29;
     // print title, advance to new line
@@ -176,56 +178,13 @@ unsafe fn show_progress(data: &[u8]) {
     LAST_TITLE_LEN = title.len(); // std size of title len is 29 + title
 
     // construct string of CPU cores
-    let mut offset = 6 + title_size + msg_size;
-    let cores_count = (data[offset]) as usize;
-    offset += 1;
-    let mut cores_string = String::new();
-
-    for _i in 0..cores_count {
-        let s1 = cores_string;
-        let s2 = get_cpu_core_mark(data[offset]);
-        let s3 = s1 + &s2;
-        cores_string = s3;
-        offset += 1;
-    }
-
-    let cpucores = format!("{}", cores_string);
-
-    // print CPU and RAM status
-    let cpu = format!(
-        "\x1b[38;2;{};{};0m{:3}%\x1b[0m",
-        get_red(_cpu),
-        get_green(_cpu),
-        _cpu
-    );
-    let mem = format!(
-        "\x1b[38;2;{};{};0m{:3}%\x1b[0m",
-        get_red(_mem),
-        get_green(_mem),
-        _mem
-    );
-
-    let full_str = format!("\n CPU:{} {} \x1b[0m RAM:{}  ", cpu, cpucores, mem);
-    print!("{}", full_str);
-    STATUS_LEN = full_str.len();
+    let offset: usize = 6 + title_size + msg_size;
+      
+    STATUS_LEN = cpuprogress::print_cpu_mem_progress(data, offset);
+   
     cursor::set_pos(cx, cy).expect("Set failed again");
 }
 
-fn get_red(value: u8) -> i32 {
-    (255.0 * ((value as f32) / 100.0)) as i32
-}
-
-fn get_green(value: u8) -> i32 {
-    (255.0 - (255.0 * ((value as f32) / 100.0))) as i32
-}
-
-fn get_cpu_core_mark(value: u8) -> String {
-    return String::from(format!(
-        "\x1b[38;2;{};{};0m■\x1b[0m",
-        get_red(value),
-        get_green(value)
-    ));
-}
 
 fn print_help_and_exit() {
     println!(
