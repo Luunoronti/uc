@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Management.Instrumentation;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -88,6 +89,15 @@ namespace ucbw
 
                 (var labelHwnd, var progressHwnd) = GetTaskLabelAndProgressWindow(hwnd);
 
+                Dictionary<string, List<int>> countAvg = null;
+
+                byte GetAvg(string name, float value)
+                {
+                    var l = countAvg[name];
+                    l.Add((int)value);
+                    if (l.Count > 20) l.RemoveAt(0);
+                    return (byte)(int)l.Average();
+                }
                 while (true)
                 {
                     var currTitle = GetWindowTextInt(hwnd);
@@ -110,7 +120,6 @@ namespace ucbw
                     lastTitle = currTitle;
                     lastMsg = currMsg;
                     lastPercentage = percent;
-
 
                     // we now implement new approach: sending byte[] buffer instead of json
                     // to make stuff way faster on both client and sender
@@ -135,7 +144,14 @@ namespace ucbw
                     data[1] = (byte)percent;
                     if (perfCountersMade)
                     {
-                        data[2] = (byte)(int)cpuCounter.First(c => c.InstanceName == "_Total").NextValue();
+                        if (countAvg == null)
+                        {
+                            countAvg = new Dictionary<string, List<int>>();
+                            foreach (var cp in cpuCounter)
+                                countAvg.Add(cp.InstanceName, new List<int>());
+                        }
+
+                        data[2] = GetAvg("_Total", cpuCounter.First(c => c.InstanceName == "_Total").NextValue());
                         data[3] = (byte)(int)((totalMemMB - ramCounter.NextValue()) / totalMemMB * 100);
                     }
 
@@ -150,7 +166,7 @@ namespace ucbw
                     for (int core = 0; core < cpuCoresCount; core++)
                     {
                         if (perfCountersMade)
-                            data[6 + titleBytes + msgbytes + 1 + core] = (byte)(int)cpuCounter[core].NextValue();
+                            data[6 + titleBytes + msgbytes + 1 + core] = GetAvg(cpuCounter[core].InstanceName, cpuCounter[core].NextValue());
                     }
                     udp.Send(data, data.Length, new IPEndPoint(IPAddress.Parse(host), port));
                     Thread.Sleep(1);
