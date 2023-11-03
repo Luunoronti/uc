@@ -43,6 +43,8 @@ namespace ucbw
             var localport = int.Parse(args.First(a => a.StartsWith("-lport:")).Substring(7));
             var pid = int.Parse(args.First(a => a.StartsWith("-pid:")).Substring(5));
 
+            var waitForInitialWindowForLonger = args.Any(a => a.StartsWith("-waitLonger"));
+            var isFirstWait = true;
 
             var sb = new StringBuilder(SB_LEN);
 
@@ -79,7 +81,8 @@ namespace ucbw
                 var titleSB = new StringBuilder(SB_LEN);
                 var msgSB = new StringBuilder(SB_LEN);
 
-                IntPtr hwnd = GetProgressWindow(pid);
+                IntPtr hwnd = GetProgressWindow(pid, waitForInitialWindowForLonger && isFirstWait);
+                isFirstWait = false;
                 if (hwnd == IntPtr.Zero)
                 {
                     byte[] data = new byte[1] { 0x11 };
@@ -227,7 +230,7 @@ namespace ucbw
             }
         }
 
-        private static IntPtr GetProgressWindow(int pid)
+        private static IntPtr GetProgressWindow(int pid, bool waitForLonger)
         {
             var sb = new StringBuilder(128);
             IntPtr fhwnd = IntPtr.Zero;
@@ -252,7 +255,7 @@ namespace ucbw
                 }), 0);
                 if (fhwnd == IntPtr.Zero)
                 {
-                    if (sw.Elapsed.TotalSeconds > 2)
+                    if (sw.Elapsed.TotalSeconds > (waitForLonger ? 10 : 2))
                         return IntPtr.Zero;
                     Thread.Sleep(100);
                 }
